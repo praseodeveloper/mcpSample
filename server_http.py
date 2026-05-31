@@ -46,6 +46,16 @@ def calculate_negative_powers(number: float) -> str:
     return f"{neg1}, {neg2}, {neg3}"
 
 
+@mcp.prompt()
+def powers_explanation(number: float) -> str:
+    """A prompt that explains the powers of a number."""
+    return (
+        f"Please calculate and explain the powers of the number {number}.\n"
+        f"Include the square ({number}^2), cube ({number}^3), 4th power ({number}^4), "
+        f"and negative powers ({number}^-1, {number}^-2, {number}^-3)."
+    )
+
+
 sse = SseServerTransport("/messages/")
 
 

@@ -4,7 +4,7 @@ A sample repository demonstrating two ways to run an MCP (Model Context Protocol
 
 ## What It Does
 
-Both servers expose a `calculate_powers` tool that computes the square, cube, and 4th power of a number. The HTTP server also adds a `calculate_negative_powers` tool and a `numberpowers://info` resource containing historical notes about number powers.
+Both servers expose a `calculate_powers` tool that computes the square, cube, and 4th power of a number. The HTTP server also adds a `calculate_negative_powers` tool, a `numberpowers://info` resource containing historical notes about number powers, and a `powers_explanation` prompt.
 
 ## Project Structure
 
@@ -45,7 +45,7 @@ python server.py
 
 ### HTTP/SSE Server (`server_http.py`)
 
-The HTTP server runs on `http://localhost:8000` and communicates over Server-Sent Events (SSE). It exposes two tools (`calculate_powers`, `calculate_negative_powers`) and one resource (`numberpowers://info`).
+The HTTP server runs on `http://localhost:8000` and communicates over Server-Sent Events (SSE). It exposes two tools (`calculate_powers`, `calculate_negative_powers`), one resource (`numberpowers://info`), and one prompt (`powers_explanation`).
 
 ```bash
 python server_http.py
@@ -97,10 +97,10 @@ After saving `opencode.json`, **restart opencode** for the MCP server to be avai
 
 ## Available MCP Capabilities
 
-| Server | Type | Tools | Resources |
-|--------|------|-------|-----------|
-| `server.py` | stdio | `calculate_powers(number)` | — |
-| `server_http.py` | HTTP/SSE | `calculate_powers(number)`, `calculate_negative_powers(number)` | `numberpowers://info` |
+| Server | Type | Tools | Resources | Prompts |
+|--------|------|-------|-----------|---------|
+| `server.py` | stdio | `calculate_powers(number)` | — | — |
+| `server_http.py` | HTTP/SSE | `calculate_powers(number)`, `calculate_negative_powers(number)` | `numberpowers://info` | `powers_explanation(number)` |
 
 ### Tool Details
 
@@ -109,6 +109,35 @@ After saving `opencode.json`, **restart opencode** for the MCP server to be avai
 **`calculate_negative_powers`** — Accepts a number, returns its negative powers (n^-1, n^-2, n^-3) as a comma-separated string. (HTTP server only)
 
 **`numberpowers://info`** — Returns historical notes about number powers from ancient civilizations. (HTTP server only)
+
+### Prompt Details
+
+**`powers_explanation`** — Accepts a number and returns a prompt asking the LLM to calculate and explain all powers of that number (square, cube, 4th power, and negative powers). (HTTP server only)
+
+## Invoking Prompts in OpenCode
+
+OpenCode supports invoking MCP prompts through the chat interface. To use the `powers_explanation` prompt:
+
+1. Start the HTTP server: `python server_http.py`
+2. In OpenCode, mention the prompt in your message, for example:
+   ```
+   Use the powers_explanation prompt for number 22
+   ```
+3. OpenCode will call the MCP server's `prompts/get` endpoint with the prompt name and arguments.
+
+Alternatively, you can manually invoke the prompt via the MCP protocol:
+
+```json
+{
+  "method": "prompts/get",
+  "params": {
+    "name": "powers_explanation",
+    "arguments": {
+      "number": 22
+    }
+  }
+}
+```
 
 ## License
 
