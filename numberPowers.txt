@@ -1,0 +1,3 @@
+The collective know-how of arithmetic in ancient Egypt (~2500 BC) helped humans create Pyramids. 
+The powers of numbers were identified by humans as early as ancient Babylonian and Greek times (~300 BC). 
+The sum of all negative powers of a number n (where |n| > 1) equals exactly 1/(n-1).
