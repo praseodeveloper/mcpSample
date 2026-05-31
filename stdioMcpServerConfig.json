@@ -3,10 +3,7 @@
   "mcp": {
     "number-powers": {
       "type": "local",
-      "command": [
-        "<path to python>",
-        "<path to server.py>"
-      ],
+      "command": ["python", "server.py"],
       "enabled": true
     }
   }
