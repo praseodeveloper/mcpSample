@@ -1,6 +1,6 @@
 # MCP Server Sample
 
-A sample repository demonstrating two ways to run an MCP (Model Context Protocol) server using Python: **stdio** (local subprocess) and **HTTP/SSE** (remote HTTP).
+A sample repository demonstrating two ways to run an MCP (Model Context Protocol) server using Python or TypeScript: **stdio** (local subprocess) and **HTTP** (Python uses HTTP/SSE, TypeScript uses Streamable HTTP).
 
 ## What It Does
 
@@ -9,55 +9,97 @@ Both servers expose a `calculate_powers` tool that computes the square, cube, an
 ## Project Structure
 
 ```
-├── server.py                  # Stdio MCP server (single tool)
-├── server_http.py             # HTTP/SSE MCP server (two tools + resource)
-├── requirements.txt           # Python dependencies
-├── numberPowers.txt           # Text file served as a resource
-├── opencode.json              # opencode config for HTTP server
-└── stdioMcpServerConfig.json  # opencode config template for stdio server
+├── .gitignore
+├── LICENSE
+├── README.md
+├── stdiomcpconfig_opencode.json    # opencode config for Python stdio server
+├── py/                             # Python implementation
+│   ├── server.py                   # Stdio MCP server (single tool)
+│   ├── server_http.py              # HTTP/SSE MCP server (two tools + resource + prompt)
+│   ├── requirements.txt            # Python dependencies
+│   ├── numberPowers.txt            # Text file served as a resource
+│   └── opencode.json               # opencode config for Python HTTP server
+└── ts/                             # TypeScript implementation
+    ├── server.ts                   # Stdio MCP server (single tool)
+    ├── server_http.ts              # Streamable HTTP MCP server (two tools + resource + prompt)
+    ├── package.json                # Node.js dependencies
+    ├── tsconfig.json               # TypeScript configuration
+    ├── numberPowers.txt            # Text file served as a resource
+    └── opencode.json               # opencode config for TypeScript HTTP server
 ```
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.10+ (for Python implementation)
+- Node.js 18+ (for TypeScript implementation)
 - An MCP-compatible client (e.g., [opencode](https://opencode.ai))
 
 ## Setup
 
-```bash
-# Create and activate a virtual environment
-python -m venv venv
-source venv/bin/activate
+### Python
 
-# Install dependencies
+```bash
+cd py
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+### TypeScript
+
+```bash
+cd ts
+npm install
+npm run build
 ```
 
 ## Running the Servers
 
-### Stdio Server (`server.py`)
+### Python - Stdio Server (`py/server.py`)
 
 The stdio server runs as a subprocess and communicates over stdin/stdout. It exposes one tool: `calculate_powers`.
 
 ```bash
+cd py
 python server.py
 ```
 
-### HTTP/SSE Server (`server_http.py`)
+### Python - HTTP/SSE Server (`py/server_http.py`)
 
 The HTTP server runs on `http://localhost:8000` and communicates over Server-Sent Events (SSE). It exposes two tools (`calculate_powers`, `calculate_negative_powers`), one resource (`numberpowers://info`), and one prompt (`powers_explanation`).
 
 ```bash
+cd py
 python server_http.py
 ```
 
 The SSE endpoint is available at `http://localhost:8000/sse`.
 
+### TypeScript - Stdio Server (`ts/server.ts`)
+
+```bash
+cd ts
+npm run start
+```
+
+### TypeScript - HTTP Server (`ts/server_http.ts`)
+
+The TypeScript HTTP server runs on `http://localhost:8001` and uses the **Streamable HTTP** transport. It exposes two tools (`calculate_powers`, `calculate_negative_powers`), one resource (`numberpowers://info`), and one prompt (`powers_explanation`).
+
+```bash
+cd ts
+npm run start:http
+```
+
+The MCP endpoint is available at `http://localhost:8001/mcp`.
+
 ## Adding to opencode
 
 ### Option 1: Stdio (local subprocess)
 
-Add the following to your `opencode.json` in the project root:
+#### Python
+
+The repository includes `stdiomcpconfig_opencode.json` at the project root with this configuration:
 
 ```json
 {
@@ -65,18 +107,39 @@ Add the following to your `opencode.json` in the project root:
   "mcp": {
     "number-powers": {
       "type": "local",
-      "command": ["python", "server.py"],
+      "command": ["python", "py/server.py"],
       "enabled": true
     }
   }
 }
 ```
 
-Adjust the `command` array to use absolute paths if needed (e.g., `["/path/to/venv/bin/python", "/path/to/server.py"]`).
+#### TypeScript
 
-### Option 2: HTTP/SSE (remote server)
+Add the following to your `opencode.json`:
 
-Start the HTTP server first (`python server_http.py`), then add this to your `opencode.json`:
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "number-powers": {
+      "type": "local",
+      "command": ["node", "ts/dist/server.js"],
+      "enabled": true
+    }
+  }
+}
+```
+
+Adjust the `command` array to use absolute paths if needed.
+
+### Option 2: HTTP (remote server)
+
+Start the HTTP server first, then add this to your `opencode.json`:
+
+#### Python
+
+The repository includes `py/opencode.json` with this configuration:
 
 ```json
 {
@@ -91,6 +154,23 @@ Start the HTTP server first (`python server_http.py`), then add this to your `op
 }
 ```
 
+#### TypeScript
+
+The repository includes `ts/opencode.json` with this configuration:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "number-powers-http": {
+      "type": "remote",
+      "url": "http://localhost:8001/mcp",
+      "enabled": true
+    }
+  }
+}
+```
+
 ### Applying Changes
 
 After saving `opencode.json`, **restart opencode** for the MCP server to be available.
@@ -99,8 +179,10 @@ After saving `opencode.json`, **restart opencode** for the MCP server to be avai
 
 | Server | Type | Tools | Resources | Prompts |
 |--------|------|-------|-----------|---------|
-| `server.py` | stdio | `calculate_powers(number)` | — | — |
-| `server_http.py` | HTTP/SSE | `calculate_powers(number)`, `calculate_negative_powers(number)` | `numberpowers://info` | `powers_explanation(number)` |
+| `py/server.py` | stdio | `calculate_powers(number)` | — | — |
+| `py/server_http.py` | HTTP/SSE (port 8000) | `calculate_powers(number)`, `calculate_negative_powers(number)` | `numberpowers://info` | `powers_explanation(number)` |
+| `ts/server.ts` | stdio | `calculate_powers(number)` | — | — |
+| `ts/server_http.ts` | Streamable HTTP (port 8001) | `calculate_powers(number)`, `calculate_negative_powers(number)` | `numberpowers://info` | `powers_explanation(number)` |
 
 ### Tool Details
 
@@ -118,7 +200,7 @@ After saving `opencode.json`, **restart opencode** for the MCP server to be avai
 
 OpenCode supports invoking MCP prompts through the chat interface. To use the `powers_explanation` prompt:
 
-1. Start the HTTP server: `python server_http.py`
+1. Start the HTTP server: `python server_http.py` or `npm run start:http`
 2. In OpenCode, mention the prompt in your message, for example:
    ```
    Use the powers_explanation prompt for number 22

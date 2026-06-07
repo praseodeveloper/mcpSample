@@ -1,2 +1,7 @@
-venv
-__pycache__
+# Python
+py/.venv
+py/__pycache__
+
+# TypeScript
+ts/node_modules
+ts/dist

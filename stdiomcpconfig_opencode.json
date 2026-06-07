@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "number-powers": {
+      "type": "local",
+      "command": ["python", "py/server.py"],
+      "enabled": true
+    }
+  }
+}

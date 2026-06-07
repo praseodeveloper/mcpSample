@@ -40,6 +40,8 @@ def calculate_negative_powers(number: float) -> str:
     Returns:
         A comma-separated string containing number^-1, number^-2, and number^-3.
     """
+    if number == 0:
+        raise ValueError("Cannot calculate negative powers of zero (division by zero)")
     neg1 = number ** -1
     neg2 = number ** -2
     neg3 = number ** -3
@@ -78,4 +80,4 @@ app = Starlette(
 )
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)

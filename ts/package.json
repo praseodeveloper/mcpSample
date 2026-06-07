@@ -1,0 +1,23 @@
+{
+  "name": "mcp-number-powers-ts",
+  "version": "1.0.0",
+  "description": "MCP Server for calculating number powers - TypeScript implementation",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "start:http": "node dist/server_http.js",
+    "dev": "tsc && node dist/server.js",
+    "dev:http": "tsc && node dist/server_http.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "express": "^4.21.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.0",
+    "typescript": "^5.6.0"
+  }
+}
